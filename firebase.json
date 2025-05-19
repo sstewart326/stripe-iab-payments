@@ -1,0 +1,26 @@
+{
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "function": "server"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "environment": {
+      "VITE_STRIPE_PUBLISHABLE_KEY": "pk_live_51R48eACy8u9r41vH8Sb8MO3ofim87p4XPSEJY9xCmezan4TC3uKNV2EIKB6hPqc5f6WEMzSNse0TPlYesknKuaXz00z8RCpryV"
+    }
+  },
+  "functions": {
+    "source": "functions"
+  }
+}
