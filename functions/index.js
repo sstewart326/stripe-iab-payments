@@ -68,8 +68,20 @@ router.post("/create-checkout-session", async (req, res) => {
 router.get("/session-status", async (req, res) => {
   const { session_id } = req.query;
   const session = await stripe.checkout.sessions.retrieve(session_id);
-  res.send({ status: session.status });
+  res.send({ 
+    status: session.status,
+    amount: formatCurrency(session.amount_total, session.currency),
+    date: session.created * 1000,
+    id: session.payment_intent
+  });
 });
+
+function formatCurrency(amount, currencyCode) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currencyCode
+  }).format(amount / 100); // Assuming amount is in cents
+}
 
 app.use("/api", router);
 

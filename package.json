@@ -1,5 +1,5 @@
 {
-  "name": "stripe-sample",
+  "name": "stripe-iab-payments",
   "version": "0.1.0",
   "dependencies": {
     "@stripe/react-stripe-js": "^3.6.0",

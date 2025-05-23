@@ -127,3 +127,99 @@ h5 {
   border-radius: 16px;
 }
 
+/* Celebration image circle */
+.celebration-image {
+  width: 158px;
+  height: 158px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0px auto;
+  font-size: 16px;
+  color: #e9eeeb;
+  font-weight: 500;
+}
+
+/* Checkmark icon */
+.checkmark {
+  color: #22c55e;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px auto;
+  display: block;
+}
+
+/* Card for confirmation */
+.confirm-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 32px rgba(80, 0, 80, 0.08);
+  padding: 32px 24px;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Transaction details */
+.transaction-details {
+  background: #f6f6fa;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 24px 0;
+  text-align: left;
+  font-size: 15px;
+}
+.transaction-details-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.transaction-details-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Confirmation message */
+.confirm-message {
+  color: #6b7280;
+  font-size: 14px;
+  margin-top: 24px;
+}
+
+.celebration-image-img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  margin-right: 0px;
+}
+
+.payment-confirmed-title { 
+  font-size: 28px; 
+  font-weight: 700; 
+  color: "#242d60"; 
+  margin-bottom: 8px; 
+}
+
+.payment-confirmed-message { 
+  color: "#6b7280";
+  margin-bottom: 0;
+}
+
+.transaction-id {
+  color: "#6b7280"
+}
+
+.transaction-id-value {
+  font-family: "monospace";
+  color: "#242d60";
+}
+
+.transaction-amount-value {
+  font-weight: 600; 
+  color: "#242d60";
+}
+
+.transaction-value {
+  color: "#242d60";
+}
