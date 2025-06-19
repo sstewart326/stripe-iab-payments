@@ -35,7 +35,7 @@ export default function Page() {
     <div className="App">
       <div className="confirm-card">
         <div className="celebration-image">
-          <img className="celebration-image-img" src="/IAB.png" />
+          <img className="celebration-image-img" src="/IAB.png" alt="IAB Logo" />
         </div>
         <svg className="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
           strokeLinecap="round" strokeLinejoin="round">
