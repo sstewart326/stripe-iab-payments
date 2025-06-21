@@ -19,7 +19,8 @@ var allowedOrigins = [
 ];
 
 if (process.env.NODE_ENV === "development") {
-  allowedOrigins.push("http://localhost:3000")
+  allowedOrigins.push("http://localhost:3000");
+  allowedOrigins.push("http://127.0.0.1:5001");
 }
 
 const corsHandler = cors({
@@ -74,6 +75,27 @@ router.get("/session-status", async (req, res) => {
     date: session.created * 1000,
     id: session.payment_intent
   });
+});
+
+router.get("/get-products", async (req, res) => {
+  const products = await stripe.products.list({
+    active: true,
+    limit: 100
+  });
+  const prices = await stripe.prices.list({
+    active: true,
+    limit: 100
+  });
+  const productsWithPrices = products.data.map(product => {
+    const price = prices.data.find(price => price.product === product.id);
+    return {
+      name: product.name,
+      price: formatCurrency(price.unit_amount, price.currency),
+      priceUrl: "/checkout/" + price.id.split("price_")[1]
+    }
+  });
+
+  res.send({products: productsWithPrices});
 });
 
 function formatCurrency(amount, currencyCode) {
