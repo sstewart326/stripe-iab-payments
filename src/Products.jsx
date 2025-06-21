@@ -26,7 +26,7 @@ const Products = () => {
 
   const checkIsAuthorized = async () => {
     onAuthStateChanged(auth, (user) => {
-      if (user || process.env.NODE_ENV === 'development') setIsAuthorized(true);
+      if (user || import.meta.env.MODE === 'development') setIsAuthorized(true);
       else setIsAuthorized(false);
     });
   }
