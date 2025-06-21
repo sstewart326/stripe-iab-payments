@@ -90,12 +90,45 @@ router.get("/get-products", async (req, res) => {
     const price = prices.data.find(price => price.product === product.id);
     return {
       name: product.name,
+      id: product.id,
+      priceId: price.id,
       price: formatCurrency(price.unit_amount, price.currency),
       priceUrl: "/checkout/" + price.id.split("price_")[1]
     }
   });
 
   res.send({products: productsWithPrices});
+});
+
+router.post("/create-product", async (req, res) => {
+  const { name, currency, unit_amount } = req.body;
+  const product = await stripe.products.create({
+    name: name,
+    default_price_data: {
+      currency: currency,
+      unit_amount: unit_amount
+    }
+  });
+  if (product.active) {
+    res.send({status: "success"});
+  } else {
+    res.send({
+      status: "error",
+      error: "Product not created"
+    });
+  }
+});
+
+router.delete("/delete-product", async (req, res) => {
+  const { productId } = req.query;
+  const updated = await stripe.products.update(productId, {
+    active: false
+  });
+  if (!updated.active) {
+    res.send({ status: "success" });
+  } else {
+    res.send({ status: "error" })
+  }
 });
 
 function formatCurrency(amount, currencyCode) {
