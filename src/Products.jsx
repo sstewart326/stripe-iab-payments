@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { getApiUrl } from "./UrlUtil";
-import { auth } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -17,19 +14,10 @@ const Products = () => {
     currency: "usd",
     unit_amount: ""
   });
-  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     fetchProducts();
-    checkIsAuthorized();
   }, []);
-
-  const checkIsAuthorized = async () => {
-    onAuthStateChanged(auth, (user) => {
-      if (user || import.meta.env.MODE === 'development') setIsAuthorized(true);
-      else setIsAuthorized(false);
-    });
-  }
 
   const fetchProducts = async () => {
     try {
@@ -166,14 +154,6 @@ const Products = () => {
         </div>
       </div>
     );
-  }
-
-  if (!isAuthorized) {
-    return (
-      <div className="App">
-        <div className="container">Not Authorized</div>
-      </div>
-    )
   }
 
   return (
