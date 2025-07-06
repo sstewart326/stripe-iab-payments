@@ -25,7 +25,6 @@ export const ReceiveToken = () => {
     try {
       // Sign in with the custom token
       const userCredential = await signInWithCustomToken(auth, customToken);
-      console.log('Successfully signed in:', userCredential.user.uid);
       
       // Don't store the custom token - store the user's ID token instead
       const idToken = await userCredential.user.getIdToken();
@@ -33,10 +32,7 @@ export const ReceiveToken = () => {
       
       setStatus('success');
       
-      // Redirect after a short delay
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1500);
+      window.location.href = '/';
     } catch (error) {
       console.error('Error signing in with custom token:', error);
       setStatus('error');
@@ -74,7 +70,7 @@ export const ReceiveToken = () => {
           )}
           {status === 'success' && (
             <div>
-              <div className="text-green-600 text-4xl mb-4">✓</div>
+              <div className="text-green-600 text-4xl mb-4"></div>
               <p className="text-gray-600">
                 Authentication successful! Redirecting...
               </p>
