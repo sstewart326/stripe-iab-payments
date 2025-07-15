@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { getApiUrl } from "./UrlUtil";
+import Transactions from "./Transactions";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -14,6 +15,8 @@ const Products = () => {
     currency: "usd",
     unit_amount: ""
   });
+  const [currentPage, setCurrentPage] = useState(0);
+  const PRODUCTS_PER_PAGE = 2;
 
   useEffect(() => {
     fetchProducts();
@@ -136,6 +139,11 @@ const Products = () => {
     }));
   };
 
+  const startIdx = currentPage * PRODUCTS_PER_PAGE;
+  const endIdx = startIdx + PRODUCTS_PER_PAGE;
+  const paginatedProducts = products.slice(startIdx, endIdx);
+  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+
   if (loading) {
     return (
       <div className="App">
@@ -218,11 +226,11 @@ const Products = () => {
           {/* Right: Products List Section */}
           <div className="products-section-td">
             <h2>Existing Products</h2>
-            {products.map((product, index) => (
+            {paginatedProducts.map((product, index) => (
               <div
-                key={index}
+                key={product.id || index}
                 className="product"
-                style={{ animationDelay: `${index * 150}ms` }}
+                style={{ animationDelay: `${(startIdx + index) * 150}ms` }}
               >
                 <div className="product-info">
                   <div className="product-icon">
@@ -266,8 +274,29 @@ const Products = () => {
                 </div>
               </div>
             ))}
+            {/* Pagination Controls */}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px', justifyContent: 'center' }}>
+              <button
+                className="button"
+                onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                disabled={currentPage === 0}
+                style={{ minWidth: 100 }}
+              >
+                Previous
+              </button>
+              <button
+                className="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={currentPage >= totalPages - 1 || totalPages === 0}
+                style={{ minWidth: 100 }}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
+        <hr style={{ margin: '40px 0' }} />
+        <Transactions />
       </div>
     </div>
   );

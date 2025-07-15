@@ -14,48 +14,53 @@ function Protected({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored ID token and attempt to restore session
-    const checkStoredAuth = async () => {
-      const storedToken = localStorage.getItem('paymentAppIdToken');
-      if (storedToken) {
-        try {
-          // Verify the stored token is still valid
-          const currentUser = auth.currentUser;
-          if (currentUser) {
-            const freshToken = await currentUser.getIdToken(true);
-            localStorage.setItem('paymentAppIdToken', freshToken);
+    if (process.env.NODE_ENV !== 'development') {
+      // Check for stored ID token and attempt to restore session
+      const checkStoredAuth = async () => {
+        const storedToken = localStorage.getItem('paymentAppIdToken');
+        if (storedToken) {
+          try {
+            // Verify the stored token is still valid
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+              const freshToken = await currentUser.getIdToken(true);
+              localStorage.setItem('paymentAppIdToken', freshToken);
+            }
+          } catch (error) {
+            console.error('Stored token invalid:', error);
+            localStorage.removeItem('paymentAppIdToken');
           }
-        } catch (error) {
-          console.error('Stored token invalid:', error);
+        }
+        setLoading(false);
+      };
+
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        setUser(firebaseUser);
+        setAuthChecked(true);
+
+        if (firebaseUser) {
+          // Update stored token when user is authenticated
+          try {
+            const idToken = await firebaseUser.getIdToken();
+            localStorage.setItem('paymentAppIdToken', idToken);
+          } catch (error) {
+            console.error('Error getting ID token:', error);
+          }
+        } else {
           localStorage.removeItem('paymentAppIdToken');
         }
-      }
+      });
+
+      checkStoredAuth();
+      return () => unsubscribe();
+    } else {
       setLoading(false);
-    };
-
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
       setAuthChecked(true);
-      
-      if (firebaseUser) {
-        // Update stored token when user is authenticated
-        try {
-          const idToken = await firebaseUser.getIdToken();
-          localStorage.setItem('paymentAppIdToken', idToken);
-        } catch (error) {
-          console.error('Error getting ID token:', error);
-        }
-      } else {
-        localStorage.removeItem('paymentAppIdToken');
-      }
-    });
-
-    checkStoredAuth();
-    return () => unsubscribe();
+    }
   }, []);
 
   useEffect(() => {
-    if (authChecked && !user && !loading) {
+    if (process.env.NODE_ENV !== 'development' && authChecked && !user && !loading) {
       window.location.href = 'https://app.inglesabordo.com/login';
     }
   }, [authChecked, user, loading]);
@@ -64,7 +69,7 @@ function Protected({ children }) {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
+  if (process.env.NODE_ENV !== 'development' && !user) {
     return null;
   }
 

@@ -100,6 +100,28 @@ router.get("/get-products", async (req, res) => {
   res.send({products: productsWithPrices});
 });
 
+router.get("/charges", async (req, rsp) => {
+  const { cursor } = req.query;
+  const params = { limit: 10 };
+  if (cursor) {
+    params.starting_after = cursor;
+  }
+  const charges = await stripe.charges.list(params);
+  const rspJson = charges.data.map(charge => ({
+    amount: charge.amount,
+    currency: charge.currency,
+    created: charge.created,
+    id: charge.id,
+    status: charge.refunded ? "refunded" : charge.status,
+    description: charge.description,
+    receipt_url: charge.receipt_url,
+    email: charge.billing_details.email,
+    type: charge.payment_method_details.type,
+    paid: charge.paid
+  }));
+  rsp.send(rspJson);
+});
+
 router.post("/create-product", async (req, res) => {
   const { name, currency, unit_amount } = req.body;
   const product = await stripe.products.create({

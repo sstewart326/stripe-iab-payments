@@ -335,10 +335,6 @@ h5 {
   box-sizing: border-box;
 }
 
-.products-section-td {
-  gap: 24px;
-}
-
 .products-section-td .product + .product {
   margin-top: 24px;
 }
@@ -455,4 +451,178 @@ h5 {
   cursor: not-allowed;
   transform: translateY(0);
   box-shadow: none;
+}
+
+/* Transactions Section Styles */
+.transactions-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 2rem;
+  margin: 0 auto 2rem auto;
+  max-width: 900px;
+}
+.transactions-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #222;
+}
+.transactions-table-wrapper {
+  overflow-x: auto;
+}
+.transactions-table-wrapper.fixed-height {
+  min-height: 540px;
+}
+.transactions-table {
+  min-width: 1000px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fafbfc;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 1rem;
+}
+.transactions-table th, .transactions-table td {
+  padding: 0.85rem 1.1rem;
+  text-align: left;
+}
+.transactions-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e5e7eb;
+}
+.transactions-table tr:nth-child(even) {
+  background: #f7f8fa;
+}
+.transactions-table tr:nth-child(odd) {
+  background: #fff;
+}
+.transactions-table td {
+  color: #444;
+}
+.status-badge {
+  display: inline-block;
+  padding: 0.25em 0.7em;
+  border-radius: 12px;
+  font-size: 0.95em;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.status-succeeded {
+  background: #e6f9ed;
+  color: #1a7f37;
+}
+.status-failed {
+  background: #fde8e8;
+  color: #d32f2f;
+}
+.status-refunded {
+  background: #fde8e8;
+  color: #f96820;
+}
+.status-pending {
+  background: #fffbe6;
+  color: #b59f00;
+}
+.transactions-pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+.transactions-btn {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.transactions-btn:disabled {
+  background: #e5e7eb;
+  color: #aaa;
+  cursor: not-allowed;
+}
+.receipt-link {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.receipt-link:hover {
+  color: #1d4ed8;
+}
+.receipt-link.disabled {
+  color: #bbb;
+  text-decoration: none;
+  cursor: not-allowed;
+}
+.transactions-loading, .transactions-error {
+  font-size: 1.1rem;
+  color: #666;
+  padding: 1.5rem 0;
+}
+
+/* Mobile stacked card layout for transactions */
+.transactions-mobile-wrapper {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .transactions-card {
+    padding-top: 3px;
+  }
+  .transactions-title {
+    font-size: 1.3rem;
+  }
+  .transactions-table th, .transactions-table td {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.95rem;
+  }
+  .transactions-table-wrapper {
+    display: none;
+  }
+  .transactions-mobile-wrapper {
+    display: block;
+    margin-top: 0.5rem;
+  }
+  .transactions-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .transactions-mobile-card {
+    background: #fafbfc;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 1.1rem 1rem 1rem 1rem;
+    font-size: 1rem;
+    color: #333;
+    border: 1px solid #f3f4f6;
+  }
+  .mobile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+    font-size: 0.98rem;
+  }
+  .mobile-label {
+    font-weight: 600;
+    color: #6366f1;
+    margin-right: 0.5em;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  .transactions-pagination {
+    justify-content: center;
+    margin-top: 1.2rem;
+  }
 }
