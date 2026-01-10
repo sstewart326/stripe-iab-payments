@@ -18,6 +18,7 @@ var allowedOrigins = [
   "https://pay.inglesabordo.com"
 ];
 
+console.log(`NODE_ENV = ${process.env.NODE_ENV}`)
 if (process.env.NODE_ENV === "development") {
   allowedOrigins.push("http://localhost:3000");
   allowedOrigins.push("http://127.0.0.1:5001");
@@ -48,7 +49,15 @@ const getDomain = () => {
 
 // Create checkout session
 router.post("/create-checkout-session", async (req, res) => {
-  const { priceId } = req.body;
+  console.log("Starting /create-checkout-session...");
+  const { priceId, isSubscription, anchorTimestamp } = req.body;
+  console.log(`priceId: ${priceId}, isSubscription: ${isSubscription}, anchorTimestamp: ${anchorTimestamp}`);
+  const mode = isSubscription ? "subscription" : "payment";
+
+  const subscriptionConfig = anchorTimestamp ? {
+    billing_cycle_anchor: anchorTimestamp,
+    proration_behavior: "none"
+  } : undefined;
 
   const session = await stripe.checkout.sessions.create({
     line_items: [
@@ -57,9 +66,10 @@ router.post("/create-checkout-session", async (req, res) => {
         quantity: 1,
       },
     ],
-    mode: "payment",
+    mode: mode,
+    subscription_data: subscriptionConfig,
     ui_mode: "embedded",
-    return_url: `${getDomain()}/done?session_id={CHECKOUT_SESSION_ID}`,
+    return_url: `${getDomain()}/done?session_id={CHECKOUT_SESSION_ID}&isSubscription=${isSubscription}&anchorTimestamp=${anchorTimestamp}`,
   });
 
   res.send({ clientSecret: session.client_secret });
@@ -67,17 +77,35 @@ router.post("/create-checkout-session", async (req, res) => {
 
 // Get status of checkout session
 router.get("/session-status", async (req, res) => {
+  console.log("Starting /session-status...");
   const { session_id } = req.query;
   const session = await stripe.checkout.sessions.retrieve(session_id);
-  res.send({ 
+  
+  const responseData = {
     status: session.status,
     amount: formatCurrency(session.amount_total, session.currency),
     date: session.created * 1000,
-    id: session.payment_intent
-  });
+    id: session.payment_intent || session.subscription
+  };
+
+  if (session.mode === 'subscription' && session.subscription) {
+    const subscription = await stripe.subscriptions.retrieve(session.subscription);
+    const price = await stripe.prices.retrieve(subscription.items.data[0].price.id);
+    
+    responseData.isSubscription = true;
+    responseData.subscriptionAmount = formatCurrency(price.unit_amount, price.currency);
+    responseData.nextBillingDate = subscription.current_period_end * 1000;
+    responseData.subscriptionId = subscription.id;
+    if (subscription.billing_cycle_anchor) {
+      responseData.anchorTimestamp = subscription.billing_cycle_anchor;
+    }
+  }
+
+  res.send(responseData);
 });
 
 router.get("/get-products", async (req, res) => {
+  console.log("Starting /get-products...");
   const products = await stripe.products.list({
     active: true,
     limit: 100
@@ -88,12 +116,23 @@ router.get("/get-products", async (req, res) => {
   });
   const productsWithPrices = products.data.map(product => {
     const price = prices.data.find(price => price.product === product.id);
+
+    const params = new URLSearchParams();
+    if (price.recurring) {
+      params.append('interval', price.recurring.interval);
+      params.append('interval_count', price.recurring.interval_count);
+    }
+    if (product.metadata && product.metadata.anchorTimestamp) {
+      params.append('anchorTimestamp', product.metadata.anchorTimestamp);
+    }
+    const priceUrl = `/checkout/${price.id.split("price_")[1]}?${params.toString()}`;
     return {
       name: product.name,
       id: product.id,
       priceId: price.id,
       price: formatCurrency(price.unit_amount, price.currency),
-      priceUrl: "/checkout/" + price.id.split("price_")[1]
+      recurring: price.recurring,
+      priceUrl: priceUrl
     }
   });
 
@@ -101,6 +140,7 @@ router.get("/get-products", async (req, res) => {
 });
 
 router.get("/charges", async (req, rsp) => {
+  console.log("Starting /charges...");
   const { cursor } = req.query;
   const params = { limit: 10 };
   if (cursor) {
@@ -123,14 +163,26 @@ router.get("/charges", async (req, rsp) => {
 });
 
 router.post("/create-product", async (req, res) => {
-  const { name, currency, unit_amount } = req.body;
-  const product = await stripe.products.create({
-    name: name,
-    default_price_data: {
-      currency: currency,
-      unit_amount: unit_amount
+  console.log("Starting /create-product...");
+  const { name, currency, unit_amount, recurring, metadata } = req.body;
+  const defaultPriceConfig = {
+    currency: currency,
+    unit_amount: unit_amount
+  }
+  if (recurring) {
+    defaultPriceConfig.recurring = {
+      interval: recurring.interval,
+      interval_count: recurring.interval_count
     }
-  });
+  }
+  const productConfig = {
+    name: name,
+    default_price_data: defaultPriceConfig
+  }
+  if (metadata) {
+    productConfig.metadata = metadata;
+  }
+  const product = await stripe.products.create(productConfig);
   if (product.active) {
     res.send({status: "success"});
   } else {
@@ -142,6 +194,7 @@ router.post("/create-product", async (req, res) => {
 });
 
 router.delete("/delete-product", async (req, res) => {
+  console.log("Starting /delete-product...");
   const { productId } = req.query;
   const updated = await stripe.products.update(productId, {
     active: false

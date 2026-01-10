@@ -70,12 +70,13 @@ body {
   flex: 1;
   padding: 24px;
   background: #ffffff;
-  align-items: center;
+  align-items: flex-start;
   gap: 20px;
 }
 
 .product-icon {
   color: #8c82fc;
+  margin-top: 15px;
 }
 
 .product-details {
@@ -451,6 +452,68 @@ h5 {
   cursor: not-allowed;
   transform: translateY(0);
   box-shadow: none;
+}
+
+/* Custom Checkbox Styles */
+.checkbox-group {
+  margin-top: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+}
+
+.custom-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #8c82fc;
+  border-radius: 4px;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  margin: 0;
+}
+
+.custom-checkbox:hover {
+  border-color: #6d7efc;
+  box-shadow: 0 0 0 3px rgba(140, 130, 252, 0.1);
+}
+
+.custom-checkbox:checked {
+  background: linear-gradient(to right, #8c82fc, #6d7efc);
+  border-color: #8c82fc;
+}
+
+.custom-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+}
+
+.custom-checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(140, 130, 252, 0.2);
+}
+
+.checkbox-text {
+  user-select: none;
+  line-height: 1.5;
 }
 
 /* Transactions Section Styles */

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, Link, Navigate } from "react-router-dom";
+import { useSearchParams, Navigate } from "react-router-dom";
 import { getApiUrl } from "./UrlUtil"
-import { CheckCircle, Download, Mail, ArrowRight } from 'lucide-react';
 
 
 export default function Page() {
@@ -31,6 +30,13 @@ export default function Page() {
     return <Navigate to="/" />
   }
 
+  const isSubscription = data.isSubscription || false;
+  const nextChargeDate = data.nextBillingDate 
+    ? new Date(data.nextBillingDate)
+    : data.anchorTimestamp 
+      ? new Date(data.anchorTimestamp * 1000)
+      : null;
+
   return (
     <div className="App">
       <div className="confirm-card">
@@ -42,21 +48,43 @@ export default function Page() {
           <circle cx="12" cy="12" r="10" stroke="#22c55e" strokeWidth="2" fill="none" />
           <path d="M9 12l2 2l4-4" stroke="#22c55e" strokeWidth="2" fill="none" />
         </svg>
-        <h1 className="payment-confirmed-title" >Payment Confirmed!</h1>
-        <p className="payment-confirmed-message">Your payment has been successfully processed</p>
+        <h1 className="payment-confirmed-title">
+          {isSubscription ? "Subscription Confirmed!" : "Payment Confirmed!"}
+        </h1>
+        <p className="payment-confirmed-message">
+          {isSubscription 
+            ? "Your subscription has been successfully set up"
+            : "Your payment has been successfully processed"}
+        </p>
         <div className="transaction-details">
           <div className="transaction-details-row">
-            <span className="transaction-id">Transaction ID</span>
+            <span className="transaction-id">{isSubscription ? "Subscription ID" : "Transaction ID"}</span>
             <span className="transaction-value">{data.id}</span>
           </div>
           <div className="transaction-details-row">
             <span className="transaction-amount">Amount</span>
-            <span className="transaction-value">{data.amount}</span>
+            <span className="transaction-value">
+              {isSubscription && data.subscriptionAmount ? data.subscriptionAmount : data.amount}
+            </span>
           </div>
-          <div className="transaction-details-row">
-            <span className="transaction-date">Date</span>
-            <span className="transaction-value">{new Date(data.date).toLocaleDateString()}</span>
-          </div>
+          {isSubscription && nextChargeDate && (
+            <div className="transaction-details-row">
+              <span className="transaction-date">First Charge Date</span>
+              <span className="transaction-value">
+                {nextChargeDate.toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </span>
+            </div>
+          )}
+          {!isSubscription && (
+            <div className="transaction-details-row">
+              <span className="transaction-date">Date</span>
+              <span className="transaction-value">{new Date(data.date).toLocaleDateString()}</span>
+            </div>
+          )}
         </div>
         <div className="confirm-message">
           <p>A confirmation email has been sent to your inbox.</p>

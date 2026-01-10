@@ -13,7 +13,11 @@ const Products = () => {
   const [formData, setFormData] = useState({
     name: "",
     currency: "usd",
-    unit_amount: ""
+    unit_amount: "",
+    is_subscription: false,
+    subscription_interval: "",
+    interval_count: "",
+    subscription_first_payment_date: ""
   });
   const [currentPage, setCurrentPage] = useState(0);
   const PRODUCTS_PER_PAGE = 2;
@@ -94,16 +98,44 @@ const Products = () => {
     setCreatingProduct(true);
     try {
       const baseUrl = getApiUrl();
+      const requestBody = {
+        name: formData.name,
+        currency: formData.currency,
+        unit_amount: parseInt(formData.unit_amount) * 100, // Convert to cents
+      }
+      if (formData.is_subscription) {
+        requestBody.recurring = {
+          interval: formData.subscription_interval,
+          interval_count: parseInt(formData.interval_count),
+        };
+        if (formData.subscription_first_payment_date) {
+          // Create date at midnight in local timezone, then convert to UTC
+          const dateParts = formData.subscription_first_payment_date.split('-');
+          const year = parseInt(dateParts[0]);
+          const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+          const day = parseInt(dateParts[2]);
+          const anchorDate = new Date(year, month, day, 0, 0, 0, 0); // Local timezone midnight
+          const anchorTimestamp = Math.floor(anchorDate.getTime() / 1000); // Convert to UTC timestamp
+          
+          // Validate that the date is in the future
+          const now = Math.floor(Date.now() / 1000);
+          if (anchorTimestamp <= now) {
+            alert("First payment date must be in the future");
+            setCreatingProduct(false);
+            return;
+          }
+          
+          requestBody.metadata = {
+            anchorTimestamp: String(anchorTimestamp)
+          };
+        }
+      }
       const response = await fetch(`${baseUrl}/api/create-product`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: formData.name,
-          currency: formData.currency,
-          unit_amount: parseInt(formData.unit_amount) * 100 // Convert to cents
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -116,7 +148,11 @@ const Products = () => {
         setFormData({
           name: "",
           currency: "usd",
-          unit_amount: ""
+          unit_amount: "",
+          is_subscription: false,
+          subscription_interval: "",
+          interval_count: "",
+          subscription_first_payment_date: ""
         });
         await fetchProducts(); // Refresh the products list
         alert("Product created successfully!");
@@ -132,10 +168,10 @@ const Products = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -175,7 +211,7 @@ const Products = () => {
             <div className="create-product-section">
               <form className="create-product-form" onSubmit={createProduct}>
                 <div className="form-group">
-                  <label htmlFor="name">Product Name *</label>
+                  <label htmlFor="name">Product Name</label>
                   <input
                     type="text"
                     id="name"
@@ -199,7 +235,7 @@ const Products = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="unit_amount">Price *</label>
+                  <label htmlFor="unit_amount">Price</label>
                   <input
                     type="number"
                     id="unit_amount"
@@ -212,6 +248,56 @@ const Products = () => {
                     required
                   />
                 </div>
+                <div className="form-group checkbox-group">
+                  <label htmlFor="isSubscription" className="checkbox-label">
+                    <span className="checkbox-text">Subscription</span>
+                    <input
+                      type="checkbox"
+                      id="isSubscription"
+                      name="is_subscription"
+                      checked={formData.is_subscription}
+                      onChange={handleInputChange}
+                      className="custom-checkbox"
+                    />
+                  </label>
+                </div>
+                {formData.is_subscription && (<div className="form-group">
+                  <label htmlFor="subscriptionInterval">Subscription Interval</label>
+                  <select
+                    id="subscriptionInterval"
+                    name="subscription_interval"
+                    value={formData.subscription_interval}
+                    onChange={handleInputChange}
+                  >
+                    <option value="week">Weekly</option>
+                    <option value="month">Monthly</option>
+                    <option value="year">Yearly</option>
+                  </select>
+                </div>)}
+                {formData.is_subscription && (<div className="form-group">
+                  <label htmlFor="subscriptionIntervalCount">Subscription ends after this many charges</label>
+                  <input
+                    type="number"
+                    id="interval_count"
+                    name="interval_count"
+                    value={formData.interval_count}
+                    onChange={handleInputChange}
+                    placeholder="1"
+                    step="1"
+                    min="1"
+                    required
+                  />
+                </div>)}
+                {formData.is_subscription && (<div className="form-group">
+                  <label htmlFor="subscriptionFirstPaymentDate">First Payment Date</label>
+                  <input
+                    type="date"
+                    id="subscriptionFirstPaymentDate"
+                    name="subscription_first_payment_date"
+                    value={formData.subscription_first_payment_date}
+                    onChange={handleInputChange}
+                  />
+                </div>)}
                 <button
                   type="submit"
                   className="button create-button"
@@ -252,7 +338,18 @@ const Products = () => {
                     </svg>
                   </div>
                   <div className="product-details">
-                    <h3>{product.name}</h3>
+                    <h2>{product.name}</h2>
+                    {product.recurring === null ? (
+                      <h3>One-Time Payment</h3>
+                    ) : (
+                      <h3>
+                        {product.recurring.interval_count === 1
+                          ? `Billed every ${product.recurring.interval}`
+                          : `Billed every ${product.recurring.interval} for ${product.recurring.interval_count} ${product.recurring.interval}s`
+                        }
+                      </h3>
+                    )
+                }
                     <p className="price">{product.price}</p>
                   </div>
                 </div>
