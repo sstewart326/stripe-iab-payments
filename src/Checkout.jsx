@@ -17,15 +17,20 @@ export default function Page() {
   const fetchClientSecret = useCallback(() => {
     const url = `${getApiUrl()}/api/create-checkout-session`
     const anchorTimestamp = searchParams.get("anchorTimestamp");
+    const userEmail = searchParams.get("userEmail");
+    const classId = searchParams.get("classId");
+    const dueDate = searchParams.get("dueDate");
     return (
       fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Pass priceId to our server
         body: JSON.stringify({ 
           priceId: priceId.startsWith("price_") ? priceId : `price_${priceId}`,
           isSubscription: !!searchParams.get("interval"),
-          anchorTimestamp: anchorTimestamp ? parseInt(anchorTimestamp) : undefined
+          anchorTimestamp: anchorTimestamp ? parseInt(anchorTimestamp) : undefined,
+          userEmail: userEmail || undefined,
+          classId: classId || undefined,
+          dueDate: dueDate || undefined,
         }),
       })
         .then(async (res) => {
