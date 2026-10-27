@@ -232,6 +232,7 @@ const Products = () => {
                   >
                     <option value="usd">USD ($)</option>
                     <option value="brl">BRL (R$)</option>
+                    <option value="eur">EUR (€)</option>
                   </select>
                 </div>
                 <div className="form-group">

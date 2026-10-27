@@ -119,7 +119,7 @@ async function registerFromSession(session) {
     classId: session.metadata.classId,
     dueDate: session.metadata.dueDate,
     amount,
-    currency: session.currency,
+    currency: session.currency.toUpperCase(),
     stripeReference: session.id,
   });
 }
@@ -144,7 +144,7 @@ async function registerFromInvoice(invoice) {
     userEmail: metadata.userEmail,
     classId: metadata.classId,
     amount,
-    currency: invoice.currency,
+    currency: invoice.currency.toUpperCase(),
     stripeReference: invoice.id,
   };
 
